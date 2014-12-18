@@ -7,6 +7,28 @@ public class Ticket {
     String content;
 
     public Ticket() {
+        status = TicketStatus.OPEN;
+    }
+
+    public Ticket(String content) {
+        this();
+        setContent(content);
+    }
+
+    public String toStringBrief() {
+        return "Ticket{" +
+                "id=" + id +
+                ", status=" + status.name() +
+                '}';
+    }
+
+    @Override
+    public String toString() {
+        return "Ticket{" +
+                "id=" + id +
+                ", status=" + status.name() +
+                ", content='" + content + '\'' +
+                '}';
     }
 
     @Override
@@ -32,7 +54,6 @@ public class Ticket {
     }
 
     public int getId() {
-
         return id;
     }
 

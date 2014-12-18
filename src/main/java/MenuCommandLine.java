@@ -1,5 +1,4 @@
-import java.util.LinkedHashMap;
-import java.util.Map;
+import java.util.*;
 import java.io.*;
 
 /**
@@ -20,30 +19,59 @@ public class MenuCommandLine implements Menu {
 
     public MenuCommandLine() {
         actionMap = new LinkedHashMap<>();
-        actionMap.put(EXIT, "Exit");
         actionMap.put(CREATE_TICKET, "Create Ticket");
         actionMap.put(SHOW_TICKET, "Show Ticket");
         actionMap.put(LIST_TICKETS, "List Tickets");
         actionMap.put(EDIT_TICKET, "Edit Ticket");
         actionMap.put(CLOSE_TICKET, "Close Ticket");
         actionMap.put(REOPEN_TICKET, "Reopen Ticket");
+        actionMap.put(EXIT, "Exit");
         reader = new BufferedReader(new InputStreamReader(System.in));
     }
 
-    public void displayActions() {
-        System.out.printf("%s\n", "Ticketing Menu");
-        for (Map.Entry<Integer, String> entry : actionMap.entrySet()) {
-            System.out.printf("  %d: %s\n", entry.getKey(), entry.getValue());
+    public void run() {
+        while (true) {
+            displayActions();
+            selectAction();
         }
     }
 
-    public void selectAction() {
+    private void displayActions() {
+
+        Map<Integer, String> leftColumnMap = new LinkedHashMap<>();
+        Map<Integer, String> rightColumnMap = new LinkedHashMap<>();
+
+        byte entryCount = 0;
+        for (Map.Entry<Integer, String> entry : actionMap.entrySet()) {
+
+            if (entryCount++ < (int)Math.ceil(actionMap.size()/2.0))
+                leftColumnMap.put(entry.getKey(), entry.getValue());
+            else
+                rightColumnMap.put(entry.getKey(), entry.getValue());
+        }
+        Iterator<Map.Entry<Integer, String>> leftColumn = leftColumnMap.entrySet().iterator();
+        Iterator<Map.Entry<Integer, String>> rightColumn = rightColumnMap.entrySet().iterator();
+        System.out.printf("\n%s\n", "Ticketing Menu");
+        while (leftColumn.hasNext()) {
+            Map.Entry<Integer, String> leftEntry = leftColumn.next();
+            if (rightColumn.hasNext()) {
+                Map.Entry<Integer, String> rightEntry = rightColumn.next();
+                System.out.printf("  %d: %-14s  %d: %-14s\n",
+                        leftEntry.getKey(), leftEntry.getValue(),
+                        rightEntry.getKey(), rightEntry.getValue());
+            } else {
+                System.out.printf("  %d: %-14s\n",
+                        leftEntry.getKey(), leftEntry.getValue());
+            }
+        }
+    }
+
+    private void selectAction() {
         boolean validChoice = false;
         Integer selectedAction = null;
         while (!validChoice) {
-            System.out.printf("Select an action \n");
             try {
-                selectedAction = promptUserForInteger();
+                selectedAction = promptUserForInteger("Select an action");
                 if (actionMap.get(selectedAction) == null)
                     throw new IOException();
                 validChoice = true;
@@ -57,19 +85,19 @@ public class MenuCommandLine implements Menu {
     public void performAction(int actionCode) {
         switch(actionCode) {
             case EXIT:
-                exit();
+                exit(); break;
             case CREATE_TICKET:
-                createTicket();
+                createTicket(); break;
             case SHOW_TICKET:
-                showTicket();
+                showTicket(); break;
             case LIST_TICKETS:
-                listTickets();
+                listTickets(); break;
             case EDIT_TICKET:
-                editTicket();
+                editTicket(); break;
             case CLOSE_TICKET:
-                closeTicket();
+                closeTicket(); break;
             case REOPEN_TICKET:
-                reopenTicket();
+                reopenTicket(); break;
         }
     }
 
@@ -78,47 +106,62 @@ public class MenuCommandLine implements Menu {
     }
 
     public void createTicket() {
-        System.out.printf("Enter the ticket's content\n");
+        String content = promptUserForString("Enter the ticket's content");
+        Ticket ticket = new Ticket(content);
+        DbPlaceholder.addToDb(ticket);
     }
 
     public void showTicket() {
         int ticketId = promptUserForTicketId();
+        Ticket ticket = DbPlaceholder.getFromDb(ticketId);
+        System.out.printf(
+                "Ticket # %d\n status: %s\n content: %s\n",
+                ticket.getId(),
+                ticket.getStatus().name(),
+                ticket.getContent()
+        );
     }
 
     public void listTickets() {
-        System.out.printf("PLACEHOLDER\n");
+        List<Ticket> tickets = DbPlaceholder.getListOfAllTickets();
+        System.out.printf("\nAll Tickets\n");
+        for (Ticket ticket : tickets) {
+            System.out.printf("  %s\n", ticket.toStringBrief());
+        }
     }
 
     public void editTicket() {
         int ticketId = promptUserForTicketId();
+        System.out.printf("Method not complete.");
     }
 
     public void closeTicket() {
         int ticketId = promptUserForTicketId();
+        System.out.printf("Method not complete.");
     }
 
     public void reopenTicket() {
         int ticketId = promptUserForTicketId();
+        System.out.printf("Method not complete.");
     }
 
     private Integer promptUserForTicketId() {
-        System.out.printf("Enter the ticket id\n");
-        return promptUserForInteger();
+        return promptUserForInteger("Enter the ticket id");
     }
 
-    private String promptUserForString() {
-        return (String) promptUserForInput(false);
+    private String promptUserForString(String prompt) {
+        return (String) promptUserForInput(prompt, false);
     }
 
-    private Integer promptUserForInteger() {
-        return (Integer) promptUserForInput(true);
+    private Integer promptUserForInteger(String prompt) {
+        return (Integer) promptUserForInput(prompt, true);
     }
 
-    private Object promptUserForInput(boolean shouldBeAnInt) {
+    private Object promptUserForInput(String prompt, boolean shouldBeAnInt) {
         Object userInput = null;
         boolean validChoice = false;
         while (!validChoice) {
-            System.out.printf("> ");
+            System.out.printf("%s> ", prompt);
             try {
                 userInput = reader.readLine();
                 if (shouldBeAnInt)

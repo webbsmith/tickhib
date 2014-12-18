@@ -10,4 +10,11 @@ public enum TicketStatus {
     TicketStatus(int code) {
         this.code = code;
     }
+
+    @Override
+    public String toString() {
+        return "TicketStatus{" +
+                "code=" + code +
+                '}';
+    }
 }
