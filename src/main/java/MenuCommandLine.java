@@ -132,17 +132,25 @@ public class MenuCommandLine implements Menu {
 
     public void editTicket() {
         int ticketId = promptUserForTicketId();
-        System.out.printf("Method not complete.");
+        Ticket ticket = DbPlaceholder.getFromDb(ticketId);
+        System.out.printf("Current content: %s\n", ticket.getContent());
+        String newContent = promptUserForString("Enter new content");
+        ticket.setContent(newContent);
+        System.out.printf("Successfully updated ticket.\n");
     }
 
     public void closeTicket() {
         int ticketId = promptUserForTicketId();
-        System.out.printf("Method not complete.");
+        Ticket ticket = DbPlaceholder.getFromDb(ticketId);
+        ticket.setStatus(TicketStatus.CLOSED);
+        System.out.printf("Successfully closed ticket.\n");
     }
 
     public void reopenTicket() {
         int ticketId = promptUserForTicketId();
-        System.out.printf("Method not complete.");
+        Ticket ticket = DbPlaceholder.getFromDb(ticketId);
+        ticket.setStatus(TicketStatus.OPEN);
+        System.out.printf("Successfully reopened ticket.\n");
     }
 
     private Integer promptUserForTicketId() {
