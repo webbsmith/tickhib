@@ -1,3 +1,10 @@
+package com.webb.tickhib.menu;
+
+import com.webb.tickhib.ticket.Ticket;
+import com.webb.tickhib.ticket.TicketDao;
+import com.webb.tickhib.ticket.TicketDaoNoPersistence;
+import com.webb.tickhib.ticket.TicketStatus;
+
 import java.util.*;
 import java.io.*;
 
@@ -8,6 +15,7 @@ public class MenuCommandLine implements Menu {
 
     Map<Integer, String> actionMap;
     BufferedReader reader;
+    TicketDao ticketDao;
     
     final static int EXIT = 0;
     final static int CREATE_TICKET = 1;
@@ -27,6 +35,7 @@ public class MenuCommandLine implements Menu {
         actionMap.put(REOPEN_TICKET, "Reopen Ticket");
         actionMap.put(EXIT, "Exit");
         reader = new BufferedReader(new InputStreamReader(System.in));
+        ticketDao = new TicketDaoNoPersistence();
     }
 
     public void run() {
@@ -108,12 +117,12 @@ public class MenuCommandLine implements Menu {
     public void createTicket() {
         String content = promptUserForString("Enter the ticket's content");
         Ticket ticket = new Ticket(content);
-        DbPlaceholder.addToDb(ticket);
+        ticketDao.add(ticket);
     }
 
     public void showTicket() {
         int ticketId = promptUserForTicketId();
-        Ticket ticket = DbPlaceholder.getFromDb(ticketId);
+        Ticket ticket = ticketDao.getTicket(ticketId);
         System.out.printf(
                 "Ticket # %d\n status: %s\n content: %s\n",
                 ticket.getId(),
@@ -123,7 +132,7 @@ public class MenuCommandLine implements Menu {
     }
 
     public void listTickets() {
-        List<Ticket> tickets = DbPlaceholder.getListOfAllTickets();
+        List<Ticket> tickets = ticketDao.getAllTickets();
         System.out.printf("\nAll Tickets\n");
         for (Ticket ticket : tickets) {
             System.out.printf("  %s\n", ticket.toStringBrief());
@@ -132,24 +141,27 @@ public class MenuCommandLine implements Menu {
 
     public void editTicket() {
         int ticketId = promptUserForTicketId();
-        Ticket ticket = DbPlaceholder.getFromDb(ticketId);
+        Ticket ticket = ticketDao.getTicket(ticketId);
         System.out.printf("Current content: %s\n", ticket.getContent());
         String newContent = promptUserForString("Enter new content");
         ticket.setContent(newContent);
+        ticketDao.edit(ticket);
         System.out.printf("Successfully updated ticket.\n");
     }
 
     public void closeTicket() {
         int ticketId = promptUserForTicketId();
-        Ticket ticket = DbPlaceholder.getFromDb(ticketId);
+        Ticket ticket = ticketDao.getTicket(ticketId);
         ticket.setStatus(TicketStatus.CLOSED);
+        ticketDao.edit(ticket);
         System.out.printf("Successfully closed ticket.\n");
     }
 
     public void reopenTicket() {
         int ticketId = promptUserForTicketId();
-        Ticket ticket = DbPlaceholder.getFromDb(ticketId);
+        Ticket ticket = ticketDao.getTicket(ticketId);
         ticket.setStatus(TicketStatus.OPEN);
+        ticketDao.edit(ticket);
         System.out.printf("Successfully reopened ticket.\n");
     }
 

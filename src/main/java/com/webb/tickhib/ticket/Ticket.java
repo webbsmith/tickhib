@@ -1,10 +1,12 @@
+package com.webb.tickhib.ticket;
+
 /**
  * Created by webbs_000 on 12/13/2014.
  */
 public class Ticket {
-    int id;
-    TicketStatus status;
-    String content;
+    private int id;
+    private TicketStatus status;
+    private String content;
 
     public Ticket() {
         status = TicketStatus.OPEN;
@@ -13,6 +15,12 @@ public class Ticket {
     public Ticket(String content) {
         this();
         setContent(content);
+    }
+
+    public Ticket(Ticket ticket) {
+        this.id = ticket.getId();
+        this.status = ticket.getStatus();
+        this.content = ticket.getContent();
     }
 
     public String toStringBrief() {

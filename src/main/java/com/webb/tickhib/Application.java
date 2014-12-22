@@ -1,3 +1,8 @@
+package com.webb.tickhib;
+
+import com.webb.tickhib.menu.Menu;
+import com.webb.tickhib.menu.MenuCommandLine;
+
 /**
  * Created by webbs_000 on 12/13/2014.
  */
